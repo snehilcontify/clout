@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Onboarding data
+  niche         String?
+  targetAudience String?
+  offer         String?
+  primaryGoal   String?   // "leads" or "calls"
+  onboardedAt   DateTime?
+
+  // Relations
+  contentIdeas  ContentIdea[]
+  leads         Lead[]
+}
+
+model ContentIdea {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hook            String
+  keyTeaching     String
+  cta             String
+  createdAt       DateTime @default(now())
+
+  // Relations
+  leads           Lead[]
+}
+
+model Lead {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentIdeaId   String
+  contentIdea     ContentIdea @relation(fields: [contentIdeaId], references: [id], onDelete: Cascade)
+  
+  name            String
+  state           String    @default("NEW")  // "NEW", "ENGAGED", "QUALIFIED"
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  conversations    Conversation[]
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  sender      String   // "lead" or "ai"
+  message     String
+  timestamp   DateTime @default(now())
+}

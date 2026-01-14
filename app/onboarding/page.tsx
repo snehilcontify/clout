@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { auth } from "@/lib/auth"
-import type { Session } from "next-auth"
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -17,15 +15,6 @@ export default function OnboardingPage() {
     offer: "",
     primaryGoal: "leads",
   })
-
-  useEffect(() => {
-    // Check if user is authenticated and already onboarded
-    auth().then((session: Session | null) => {
-      if (!session?.user) {
-        router.push("/auth/signin")
-      }
-    })
-  }, [router])
 
   const handleNext = () => {
     setError("")
@@ -67,6 +56,7 @@ export default function OnboardingPage() {
       }
 
       router.push("/dashboard")
+      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -156,7 +146,7 @@ export default function OnboardingPage() {
                       }`}
                     >
                       {formData.primaryGoal === "leads" && (
-                        <div className="w-2 h-2 rounded-full bg-white mx-auto mt-1" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black mx-auto" />
                       )}
                     </div>
                     <div>
@@ -186,7 +176,7 @@ export default function OnboardingPage() {
                       }`}
                     >
                       {formData.primaryGoal === "calls" && (
-                        <div className="w-2 h-2 rounded-full bg-white mx-auto mt-1" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black mx-auto" />
                       )}
                     </div>
                     <div>
@@ -203,14 +193,10 @@ export default function OnboardingPage() {
                 type="text"
                 value={formData[currentStep.field as keyof typeof formData] as string}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    [currentStep.field]: e.target.value,
-                  })
+                  setFormData({ ...formData, [currentStep.field]: e.target.value })
                 }
                 placeholder={currentStep.placeholder}
                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                autoFocus
               />
             )}
           </div>
@@ -221,7 +207,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleBack}
                 disabled={loading}
-                className="flex-1 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
               >
                 Back
               </button>
@@ -232,16 +218,16 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleNext}
                 disabled={loading}
-                className="flex-1 bg-black dark:bg-white text-white dark:text-black font-medium py-3 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                className="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50"
               >
-                Next
+                {loading ? "Next" : "Next"}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex-1 bg-black dark:bg-white text-white dark:text-black font-medium py-3 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                className="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Complete Setup"}
               </button>

@@ -1,10 +1,11 @@
-import Credentials from "next-auth/providers/credentials"
+import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
+import NextAuth, { type Session } from "next-auth"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const config = {
   providers: [
-    Credentials({
+    CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
@@ -39,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.sub as string
       }
@@ -53,4 +54,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-})
+}
+
+export const { handlers, signIn, signOut, auth } = NextAuth(config)
